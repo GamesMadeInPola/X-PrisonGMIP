@@ -91,18 +91,7 @@ public final class NukeEnchant extends XPrisonEnchantment {
             return;
         }
 
-        if (this.useEvents) {
-            final List<BlockBreakEvent> ignored = this.plugin.getEnchantsListener().getIgnoredEvents();
-            blocksAffected = event.getBlocksAffected().stream().filter(block -> {
-                final BlockBreakEvent blockEvent = new BlockBreakEvent(block, p);
-                ignored.add(blockEvent);
-                Bukkit.getPluginManager().callEvent(blockEvent);
-                ignored.remove(blockEvent);
-                return !e.isCancelled();
-            }).collect(Collectors.toList());
-        } else {
-            blocksAffected = event.getBlocksAffected();
-        }
+        blocksAffected = event.getBlocksAffected();
 
         if (!this.plugin.getCore().isUltraBackpacksEnabled()) {
             handleAffectedBlocks(p, region, blocksAffected);
@@ -150,6 +139,7 @@ public final class NukeEnchant extends XPrisonEnchantment {
 
             if (autoSellPlayerEnabled) {
                 totalDeposit += ((plugin.getCore().getAutoSell().getManager().getPriceForBlock(region.getId(), block) + 0.0) * amplifier);
+                plugin.getCore().getAutoSell().getManager().addToLastItems(p, amplifier);
             } else {
                 ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(amplifier);
                 p.getInventory().addItem(itemToGive);

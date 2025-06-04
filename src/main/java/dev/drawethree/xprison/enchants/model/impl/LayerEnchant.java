@@ -147,7 +147,8 @@ public final class LayerEnchant extends XPrisonEnchantment {
                 totalDeposit += ((plugin.getCore().getAutoSell().getManager().getPriceForBlock(region.getId(), block) + 0.0) * amplifier);
                 plugin.getCore().getAutoSell().getManager().addToLastItems(p, amplifier);
             } else {
-                ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(FortuneEnchant.getBonusMultiplier(amplifier));
+                var itemAmount = FortuneEnchant.getBonusMultiplier(amplifier);
+                ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(itemAmount == 0 ? 1 : itemAmount);
                 if (itemToGive == null) continue;
                 p.getInventory().addItem(itemToGive);
             }

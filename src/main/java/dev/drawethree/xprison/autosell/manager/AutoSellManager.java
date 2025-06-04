@@ -9,6 +9,7 @@ import dev.drawethree.xprison.autosell.utils.AutoSellContants;
 import dev.drawethree.xprison.enchants.model.impl.FortuneEnchant;
 import dev.drawethree.xprison.enchants.utils.EnchantUtils;
 import dev.drawethree.xprison.multipliers.enums.MultiplierType;
+import dev.drawethree.xprison.utils.NumberUtils;
 import dev.drawethree.xprison.utils.compat.CompMaterial;
 import dev.drawethree.xprison.utils.economy.EconomyUtils;
 import dev.drawethree.xprison.utils.inventory.InventoryUtils;
@@ -143,14 +144,17 @@ public class AutoSellManager {
 
         Map<AutoSellItemStack, Double> itemsToSell = new HashMap<>();
         for (var item : sender.getInventory().getContents()) {
-            if (item == null) {
-                continue;
-            }
+            if (item == null) continue;
             var blockType = item.getType();
             if (cachePrices.containsKey(blockType)) {
                 var price = cachePrices.get(blockType);
                 itemsToSell.put(new AutoSellItemStack(item), price);
             }
+        }
+
+        if (itemsToSell.isEmpty()) {
+            PlayerUtils.sendMessage(sender, plugin.getAutoSellConfig().getMessage("sell_all_empty"));
+            return;
         }
 
         XPrisonSellAllEvent event = this.callSellAllEvent(sender, null, itemsToSell);
@@ -160,7 +164,10 @@ public class AutoSellManager {
         itemsToSell.keySet().forEach(sellItem -> sender.getInventory().remove(sellItem.getItemStack()));
 
         if (totalAmount > 0.0) {
-            PlayerUtils.sendMessage(sender, this.plugin.getAutoSellConfig().getMessage("sell_all_complete").replace("%price%", String.format("%,.0f", totalAmount)));
+            PlayerUtils.sendMessage(sender, this.plugin.getAutoSellConfig().getMessage("sell_all_complete")
+                    .replace("%price%", String.format("%,.0f", totalAmount))
+                    .replace("%price_format%", NumberUtils.format(totalAmount))
+            );
         }
         /*if (!this.validateRegionBeforeSellAll(sender, region)) {
             return;

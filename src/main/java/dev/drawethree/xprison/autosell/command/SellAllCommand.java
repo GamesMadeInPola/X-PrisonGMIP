@@ -23,19 +23,7 @@ public class SellAllCommand {
         Commands.create()
                 .assertPlayer()
                 .handler(c -> {
-                    IWrappedRegion region;
-                    if (plugin.getCore().getAutoSell().getAutoSellConfig().getYamlConfig().getBoolean("use-regions")) {
-                        region = this.parseRegionFromCommandContext(c);
-
-                        if (region == null) {
-                            PlayerUtils.sendMessage(c.sender(), this.plugin.getAutoSellConfig().getMessage("invalid_region"));
-                            return;
-                        }
-                    } else {
-                        region = RegionUtils.getRegionWithHighestPriority(c.sender().getLocation());
-                    }
-
-                    this.plugin.getManager().sellAll(c.sender(), region);
+                    this.plugin.getManager().sellAll(c.sender(), null);
 
                 }).registerAndBind(this.plugin.getCore(), COMMAND_NAME);
     }
