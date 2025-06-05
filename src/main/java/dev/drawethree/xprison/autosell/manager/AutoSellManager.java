@@ -1,5 +1,7 @@
 package dev.drawethree.xprison.autosell.manager;
 
+import at.pcgamingfreaks.Minepacks.Bukkit.API.Backpack;
+import dev.drawethree.xprison.XPrison;
 import dev.drawethree.xprison.autosell.XPrisonAutoSell;
 import dev.drawethree.xprison.autosell.api.events.XPrisonAutoSellEvent;
 import dev.drawethree.xprison.autosell.api.events.XPrisonSellAllEvent;
@@ -334,6 +336,18 @@ public class AutoSellManager {
 
         if (!InventoryUtils.hasSpace(player.getInventory())) {
             this.notifyInventoryFull(player);
+
+            if(XPrison.getMinepacks() != null){
+                Backpack backpack = XPrison.getMinepacks().getBackpackCachedOnly(player);
+                if(backpack != null){
+                    if(backpack.getInventory().firstEmpty() != -1){
+                        plugin.getCore().debug("Giving item " + block.getType() + " to backpack of player " + player.getName(), this.plugin);
+                        backpack.getInventory().addItem(CompMaterial.fromBlock(block).toItem());
+                        return true;
+                    }
+                }
+            }
+
             return true;
         }
 

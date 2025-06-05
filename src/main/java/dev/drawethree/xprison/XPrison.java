@@ -1,5 +1,6 @@
 package dev.drawethree.xprison;
 
+import at.pcgamingfreaks.Minepacks.Bukkit.API.MinepacksPlugin;
 import com.github.lalyos.jfiglet.FigletFont;
 import dev.drawethree.xprison.autominer.XPrisonAutoMiner;
 import dev.drawethree.xprison.autosell.XPrisonAutoSell;
@@ -46,11 +47,13 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.flag.WrappedState;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
@@ -112,6 +115,12 @@ public final class XPrison extends ExtendedJavaPlugin {
 			return;
 		} else {
 			this.getLogger().info("Economy provider for Vault found - " + this.getEconomy().getName());
+		}
+
+		if (getMinepacks() == null){
+			this.getLogger().warning("Minepacks plugin not found! Some features may not work properly.");
+		} else {
+			this.getLogger().info("Minepacks plugin found, integration enabled.");
 		}
 
 		this.initVariables();
@@ -455,5 +464,15 @@ public final class XPrison extends ExtendedJavaPlugin {
 
 	public WorldGuardWrapper getWorldGuardWrapper() {
 		return WorldGuardWrapper.getInstance();
+	}
+
+	@Nullable
+	public static MinepacksPlugin getMinepacks() {
+		Plugin bukkitPlugin = Bukkit.getPluginManager().getPlugin("Minepacks");
+		if(!(bukkitPlugin instanceof MinepacksPlugin)) {
+			// Do something if Minepacks is not available
+			return null;
+		}
+		return (MinepacksPlugin) bukkitPlugin;
 	}
 }
