@@ -555,6 +555,7 @@ enchants:
     Count-Blocks-Broken: true
     Use-Events: false
     Message: "&e&lENCHANT &8» &7You got &2&l$&a%money% &7from &c&lNuke &7activation."
+    NoAutosell: "&e&lENCHANT &8» &7Nuke has stopped because you don''t have autosell enabled"
     Refund:
       Enabled: true
       InGuiSlot: 47
@@ -602,6 +603,7 @@ Pickaxe:
   # ROMAN = All levels as roman numbers
   # FIXED = First 10 levels as roman,
   level-format: NUMBER
+  format: "&7[&c-&7] &8%Enchant% %Level%"
   excluded-format: "&7[&c-&7] &8%Enchant% %Level%"
   lore:
     - '&8&m------------------------'

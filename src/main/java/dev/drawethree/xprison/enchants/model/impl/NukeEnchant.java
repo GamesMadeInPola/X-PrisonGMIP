@@ -40,6 +40,7 @@ public final class NukeEnchant extends XPrisonEnchantment {
     private boolean removeBlocks;
     private boolean useEvents;
     private String message;
+    private String noAutoSell;
 
     public NukeEnchant(XPrisonEnchants instance) {
         super(instance, 21);
@@ -48,6 +49,7 @@ public final class NukeEnchant extends XPrisonEnchantment {
         this.removeBlocks = plugin.getEnchantsConfig().getYamlConfig().getBoolean("enchants." + id + ".Remove-Blocks");
         this.useEvents = plugin.getEnchantsConfig().getYamlConfig().getBoolean("enchants." + id + ".Use-Events");
         this.message = TextUtils.applyColor(plugin.getEnchantsConfig().getYamlConfig().getString("enchants." + id + ".Message"));
+        this.noAutoSell = TextUtils.applyColor(plugin.getEnchantsConfig().getYamlConfig().getString("enchants." + id + ".NoAutosell"));
     }
 
     @Override
@@ -71,8 +73,16 @@ public final class NukeEnchant extends XPrisonEnchantment {
             return;
         }
 
-        long startTime = Time.nowMillis();
         final Player p = e.getPlayer();
+
+        if (plugin.isAutoSellModuleEnabled() && !plugin.getCore().getAutoSell().getManager().hasAutoSellEnabled(p)) {
+            if (noAutoSell != null && !noAutoSell.isEmpty()) {
+                PlayerUtils.sendMessage(p,noAutoSell);
+                return;
+            }
+        }
+
+        long startTime = Time.nowMillis();
         final Block b = e.getBlock();
 
         IWrappedRegion region = RegionUtils.getRegionWithHighestPriorityAndFlag(b.getLocation(), Constants.ENCHANTS_WG_FLAG_NAME, WrappedState.ALLOW);
@@ -112,7 +122,7 @@ public final class NukeEnchant extends XPrisonEnchantment {
         }
 
         if (!this.useEvents) {
-            plugin.getCore().getTokens().getTokensManager().handleBlockBreak(p, blocksAffected, countBlocksBroken);
+            plugin.getCore().getTokens().getTokensManager().handleBlockBreak(p, blocksAffected,1000000, countBlocksBroken);
         }
 
         var rmAPI = RealMinesAPI.getInstance();
@@ -126,12 +136,13 @@ public final class NukeEnchant extends XPrisonEnchantment {
     private void handleAffectedBlocks(Player p, IWrappedRegion region, List<Block> blocksAffected) {
         double totalDeposit = 0.0;
         int fortuneLevel = EnchantUtils.getItemFortuneLevel(p.getItemInHand());
+        int blockMulti = FortuneEnchant.getBonusMultiplier(fortuneLevel);
 
         boolean autoSellPlayerEnabled = this.plugin.isAutoSellModuleEnabled() && plugin.getCore().getAutoSell().getManager().hasAutoSellEnabled(p);
 
         for (Block block : blocksAffected) {
 
-            int amplifier = fortuneLevel;
+            int amplifier = (blockMulti == 0 ? 1 : blockMulti);
 
             if (FortuneEnchant.isBlockBlacklisted(block)) {
                 amplifier = 1;
@@ -205,6 +216,7 @@ public final class NukeEnchant extends XPrisonEnchantment {
         this.removeBlocks = plugin.getEnchantsConfig().getYamlConfig().getBoolean("enchants." + id + ".Remove-Blocks");
         this.useEvents = plugin.getEnchantsConfig().getYamlConfig().getBoolean("enchants." + id + ".Use-Events");
         this.message = TextUtils.applyColor(plugin.getEnchantsConfig().getYamlConfig().getString("enchants." + id + ".Message"));
+        this.noAutoSell = TextUtils.applyColor(plugin.getEnchantsConfig().getYamlConfig().getString("enchants." + id + ".NoAutosell"));
 
     }
 

@@ -151,16 +151,9 @@ public class EnchantsManager {
 					int enchLvl = enchants.getOrDefault(enchantment, 0);
 					if (enchLvl > 0) {
                         final String line;
-                        if (player.hasPermission(EXCLUDE_PERMISSION + enchantment.getRawName())) {
-                            line = this.plugin.getEnchantsConfig().getExcludedFormat()
-									.replace("%Enchant%", enchantment.getNameUncolor())
-									.replace("%Level%", this.plugin.getEnchantsConfig().getLevelFormat().format(enchLvl));
-                        } else {
-							line = this.plugin.getEnchantsConfig().getFormat()
-									.replace("%Enchant%", enchantment.getNameUncolor())
-									.replace("%Level%", this.plugin.getEnchantsConfig().getLevelFormat().format(enchLvl));
-							//line = enchantment.getName() + " " + this.plugin.getEnchantsConfig().getLevelFormat().format(enchLvl);
-						}
+						line = this.plugin.getEnchantsConfig().getFormat()
+								.replace("%Enchant%", enchantment.getNameUncolor())
+								.replace("%Level%", this.plugin.getEnchantsConfig().getLevelFormat().format(enchLvl));
 						s = s.replace(matcher.group(), line);
 					} else {
 						continue;
@@ -336,7 +329,7 @@ public class EnchantsManager {
 
 	public void disenchant(XPrisonEnchantment enchantment, DisenchantGUI gui, int currentLevel, int substraction) {
 
-		if (currentLevel <= 1) {
+		if (currentLevel <= 0) {
 			PlayerUtils.sendMessage(gui.getPlayer(), plugin.getEnchantsConfig().getMessage("enchant_no_level"));
 			return;
 		}

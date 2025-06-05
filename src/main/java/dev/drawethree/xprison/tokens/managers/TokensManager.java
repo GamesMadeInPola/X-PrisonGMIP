@@ -615,15 +615,11 @@ public class TokensManager {
 		this.savePlayerDataOnDisable();
 	}
 
-
 	public void handleBlockBreak(Player p, List<Block> blocks, boolean countBlocksBroken) {
-
 		long startTime = System.currentTimeMillis();
-
 		if (countBlocksBroken) {
 			this.addBlocksBroken(p, blocks);
 		}
-
 		//Lucky block check
 		blocks.forEach(block -> {
 			List<String> rewards = this.plugin.getTokensConfig().getLuckyBlockReward(block.getType());
@@ -631,7 +627,6 @@ public class TokensManager {
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s.replace("%player%", p.getName()));
 			}
 		});
-
 		long totalAmount = 0;
 		for (int i = 0; i < blocks.size(); i++) {
 			double random = ThreadLocalRandom.current().nextDouble(100);
@@ -643,6 +638,24 @@ public class TokensManager {
 		}
 		if (totalAmount > 0) {
 			this.giveTokens(p, totalAmount, null, ReceiveCause.MINING);
+		}
+		this.plugin.getCore().debug("XPrisonTokens::handleBlockBreak >> Took " + (System.currentTimeMillis() - startTime) + " ms.", this.plugin);
+	}
+
+	public void handleBlockBreak(Player p, List<Block> blocks, long giveTokens, boolean countBlocksBroken) {
+		long startTime = System.currentTimeMillis();
+		if (countBlocksBroken) {
+			this.addBlocksBroken(p, blocks);
+		}
+		//Lucky block check
+		blocks.forEach(block -> {
+			List<String> rewards = this.plugin.getTokensConfig().getLuckyBlockReward(block.getType());
+			for (String s : rewards) {
+				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s.replace("%player%", p.getName()));
+			}
+		});
+        if (giveTokens > 0) {
+			this.giveTokens(p, giveTokens, null, ReceiveCause.MINING);
 		}
 		this.plugin.getCore().debug("XPrisonTokens::handleBlockBreak >> Took " + (System.currentTimeMillis() - startTime) + " ms.", this.plugin);
 	}
