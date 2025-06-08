@@ -2,7 +2,9 @@ package dev.drawethree.xprison.enchants.model.impl;
 
 import dev.drawethree.xprison.enchants.XPrisonEnchants;
 import dev.drawethree.xprison.enchants.model.XPrisonEnchantment;
+import dev.drawethree.xprison.utils.BackpackUtils;
 import dev.drawethree.xprison.utils.compat.CompMaterial;
+import dev.drawethree.xprison.utils.inventory.InventoryUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -68,10 +70,16 @@ public final class FortuneEnchant extends XPrisonEnchantment {
 
         int baseAmount = 1;
         int bonus = getBonusMultiplier(enchantLevel);
-
-
+        Player player = e.getPlayer();
         if (!this.plugin.getCore().getAutoSell().getManager().hasAutoSellEnabled(e.getPlayer())) {
             ItemStack drop = new ItemStack(dropType, baseAmount + bonus);
+            if (!InventoryUtils.hasSpace(player.getInventory())) {
+                if (BackpackUtils.isBackpackFull(player)) {
+                    return;
+                }
+                BackpackUtils.addBlocks(player, new ItemStack(block.getType(), 1));
+                return;
+            }
             e.getPlayer().getInventory().addItem(drop);
         }
     }

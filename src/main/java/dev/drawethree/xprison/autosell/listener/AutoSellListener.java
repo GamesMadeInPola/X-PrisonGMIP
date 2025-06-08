@@ -58,20 +58,16 @@ public class AutoSellListener {
                         }
                     }
 
-                    //boolean success = false;
+                    boolean success;
                     if (this.plugin.getManager().hasAutoSellEnabled(e.getPlayer())) {
-                        this.plugin.getManager().autoSellBlock(e.getPlayer(), e.getBlock());
+                        success = this.plugin.getManager().autoSellBlock(e.getPlayer(), e.getBlock());
                     } else {
-                        this.plugin.getManager().givePlayerItem(e.getPlayer(), e.getBlock());
+                        success = this.plugin.getManager().givePlayerItem(e.getPlayer(), e.getBlock());
                     }
 
-                    e.setDropItems(false);
-                    /*if (success) {
-                        // Do not set block to air due to compatibility issues
-                        e.setDropItems(false);
-                    } else {
-                        e.setCancelled(true);
-                    }*/
+                    // Do not set block to air due to compatibility issues
+                    e.setDropItems(!success);
+
                 }).bindWith(this.plugin.getCore());
     }
 }

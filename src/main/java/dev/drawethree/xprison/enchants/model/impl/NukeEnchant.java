@@ -7,8 +7,10 @@ import dev.drawethree.xprison.enchants.model.XPrisonEnchantment;
 import dev.drawethree.xprison.enchants.utils.EnchantUtils;
 import dev.drawethree.xprison.mines.model.mine.Mine;
 import dev.drawethree.xprison.multipliers.enums.MultiplierType;
+import dev.drawethree.xprison.utils.BackpackUtils;
 import dev.drawethree.xprison.utils.Constants;
 import dev.drawethree.xprison.utils.compat.CompMaterial;
+import dev.drawethree.xprison.utils.inventory.InventoryUtils;
 import dev.drawethree.xprison.utils.misc.MathUtils;
 import dev.drawethree.xprison.utils.misc.RegionUtils;
 import dev.drawethree.xprison.utils.player.PlayerUtils;
@@ -153,7 +155,14 @@ public final class NukeEnchant extends XPrisonEnchantment {
                 plugin.getCore().getAutoSell().getManager().addToLastItems(p, amplifier);
             } else {
                 ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(amplifier);
-                p.getInventory().addItem(itemToGive);
+                if (itemToGive == null) continue;
+                if (!InventoryUtils.hasSpace(p.getInventory())) {
+                    if (!BackpackUtils.isBackpackFull(p)) {
+                        BackpackUtils.addBlocks(p, itemToGive);
+                    }
+                } else {
+                    p.getInventory().addItem(itemToGive);
+                }
             }
 
             if (this.removeBlocks) {

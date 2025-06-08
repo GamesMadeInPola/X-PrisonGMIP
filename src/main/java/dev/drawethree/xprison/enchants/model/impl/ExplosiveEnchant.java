@@ -7,12 +7,14 @@ import dev.drawethree.xprison.enchants.model.XPrisonEnchantment;
 import dev.drawethree.xprison.enchants.utils.EnchantUtils;
 import dev.drawethree.xprison.mines.model.mine.Mine;
 import dev.drawethree.xprison.multipliers.enums.MultiplierType;
+import dev.drawethree.xprison.utils.BackpackUtils;
 import dev.drawethree.xprison.utils.Constants;
 import dev.drawethree.xprison.utils.MineUtils;
 import dev.drawethree.xprison.utils.block.CuboidExplosionBlockProvider;
 import dev.drawethree.xprison.utils.block.ExplosionBlockProvider;
 import dev.drawethree.xprison.utils.block.SpheroidExplosionBlockProvider;
 import dev.drawethree.xprison.utils.compat.CompMaterial;
+import dev.drawethree.xprison.utils.inventory.InventoryUtils;
 import dev.drawethree.xprison.utils.misc.RegionUtils;
 import me.lucko.helper.Events;
 import me.lucko.helper.time.Time;
@@ -162,7 +164,13 @@ public final class ExplosiveEnchant extends XPrisonEnchantment {
                 totalDeposit += ((plugin.getCore().getAutoSell().getManager().getPriceForBlock(region.getId(), block) + 0.0) * amplifier);
             } else {
                 ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(amplifier);
-                p.getInventory().addItem(itemToGive);
+                if (!InventoryUtils.hasSpace(p.getInventory())) {
+                    if (!BackpackUtils.isBackpackFull(p)) {
+                        BackpackUtils.addBlocks(p, itemToGive);
+                    }
+                } else {
+                    p.getInventory().addItem(itemToGive);
+                }
             }
             block.setType(Material.AIR, true);
         }

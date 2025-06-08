@@ -9,6 +9,7 @@ import dev.drawethree.xprison.autosell.utils.AutoSellContants;
 import dev.drawethree.xprison.enchants.model.impl.FortuneEnchant;
 import dev.drawethree.xprison.enchants.utils.EnchantUtils;
 import dev.drawethree.xprison.multipliers.enums.MultiplierType;
+import dev.drawethree.xprison.utils.BackpackUtils;
 import dev.drawethree.xprison.utils.NumberUtils;
 import dev.drawethree.xprison.utils.compat.CompMaterial;
 import dev.drawethree.xprison.utils.economy.EconomyUtils;
@@ -149,6 +150,18 @@ public class AutoSellManager {
             if (cachePrices.containsKey(blockType)) {
                 var price = cachePrices.get(blockType);
                 itemsToSell.put(new AutoSellItemStack(item), price);
+            }
+        }
+        var invBackpack = BackpackUtils.getInv(sender);
+        if (invBackpack != null) {
+            for (var item : invBackpack.getContents()) {
+                if (item == null) continue;
+                var blockType = item.getType();
+                if (cachePrices.containsKey(blockType)) {
+                    var price = cachePrices.get(blockType);
+                    itemsToSell.put(new AutoSellItemStack(item.clone()), price);
+                    item.setAmount(0);
+                }
             }
         }
 
@@ -333,7 +346,11 @@ public class AutoSellManager {
     public boolean givePlayerItem(Player player, Block block) {
 
         if (!InventoryUtils.hasSpace(player.getInventory())) {
-            this.notifyInventoryFull(player);
+            if (BackpackUtils.isBackpackFull(player)) {
+                this.notifyInventoryFull(player);
+                return false;
+            }
+            BackpackUtils.addBlocks(player, new ItemStack(block.getType(), 1));
             return true;
         }
 
@@ -372,10 +389,9 @@ public class AutoSellManager {
     }
 
     public boolean autoSellBlock(Player player, Block block) {
-        var config = plugin.getAutoSellConfig().getYamlConfig();
-        var blockType = block.getType().name();
-        if (!config.contains("blocks."+blockType)) return false;
-        var priceAmount = config.getDouble("blocks."+blockType, 0);
+        var blockType = block.getType();
+        if (!cachePrices.containsKey(blockType)) return false;
+        var priceAmount = cachePrices.getOrDefault(blockType, 0D);
 
         Map<AutoSellItemStack, Double> itemsToSell = new HashMap<>();
         itemsToSell.put(new AutoSellItemStack(createItemStackToGive(player, block)), priceAmount);

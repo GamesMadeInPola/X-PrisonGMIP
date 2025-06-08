@@ -229,6 +229,13 @@
       <systemPath>${project.basedir}/libs/plugins/RealMines.jar</systemPath>
     </dependency>
     <dependency>
+      <groupId>internal</groupId>
+      <artifactId>backpack</artifactId>
+      <version>LATEST</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/plugins/Minepacks-2.4.31.7.jar</systemPath>
+    </dependency>
+    <dependency>
       <groupId>be.maximvdw</groupId>
       <artifactId>MVdWPlaceholderAPI</artifactId>
       <version>3.1.1-SNAPSHOT</version>
