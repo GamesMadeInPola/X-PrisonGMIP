@@ -16,6 +16,7 @@ import dev.drawethree.xprison.utils.economy.EconomyUtils;
 import dev.drawethree.xprison.utils.inventory.InventoryUtils;
 import dev.drawethree.xprison.utils.misc.MaterialUtils;
 import dev.drawethree.xprison.utils.player.PlayerUtils;
+import lombok.Getter;
 import me.lucko.helper.Events;
 import me.lucko.helper.cooldown.Cooldown;
 import me.lucko.helper.cooldown.CooldownMap;
@@ -41,7 +42,7 @@ public class AutoSellManager {
     private final XPrisonAutoSell plugin;
     private final Map<UUID, Double> lastEarnings;
     private final Map<UUID, Long> lastItems;
-    private final HashMap<Material, Double> cachePrices;
+    @Getter private final HashMap<Material, Double> cachePrices;
     private final Map<String, SellRegion> regionsAutoSell;
     private final List<UUID> enabledAutoSellPlayers;
     private final Map<String, Set<String>> notLoadedSellRegions;
@@ -142,13 +143,12 @@ public class AutoSellManager {
 
 
     public void sellAll(Player sender, IWrappedRegion region) {
-
         Map<AutoSellItemStack, Double> itemsToSell = new HashMap<>();
         for (var item : sender.getInventory().getContents()) {
             if (item == null) continue;
             var blockType = item.getType();
             if (cachePrices.containsKey(blockType)) {
-                var price = cachePrices.get(blockType);
+                var price = cachePrices.get(blockType) * item.getAmount();
                 itemsToSell.put(new AutoSellItemStack(item), price);
             }
         }
@@ -158,27 +158,27 @@ public class AutoSellManager {
                 if (item == null) continue;
                 var blockType = item.getType();
                 if (cachePrices.containsKey(blockType)) {
-                    var price = cachePrices.get(blockType);
+                    var price = cachePrices.get(blockType) * item.getAmount();
                     itemsToSell.put(new AutoSellItemStack(item.clone()), price);
                     item.setAmount(0);
                 }
             }
         }
-
         if (itemsToSell.isEmpty()) {
             PlayerUtils.sendMessage(sender, plugin.getAutoSellConfig().getMessage("sell_all_empty"));
             return;
         }
-
-        XPrisonSellAllEvent event = this.callSellAllEvent(sender, null, itemsToSell);
-        if (event.isCancelled()) return;
-        itemsToSell = event.getItemsToSell();
+        //XPrisonSellAllEvent event = this.callSellAllEvent(sender, null, itemsToSell);
+        //if (event.isCancelled()) return;
+        //itemsToSell = event.getItemsToSell();
         double totalAmount = this.sellItems(sender, itemsToSell);
+        int amountOfItems = itemsToSell.keySet().stream().mapToInt(item -> item.getItemStack().getAmount()).sum();
         itemsToSell.keySet().forEach(sellItem -> sender.getInventory().remove(sellItem.getItemStack()));
 
         if (totalAmount > 0.0) {
             PlayerUtils.sendMessage(sender, this.plugin.getAutoSellConfig().getMessage("sell_all_complete")
                     .replace("%price%", String.format("%,.0f", totalAmount))
+                    .replace("%items%", String.format("%,d", amountOfItems))
                     .replace("%price_format%", NumberUtils.format(totalAmount))
             );
         }
@@ -345,10 +345,12 @@ public class AutoSellManager {
 
     public boolean givePlayerItem(Player player, Block block) {
 
+        if (!cachePrices.containsKey(block.getType())) return false;
+
         if (!InventoryUtils.hasSpace(player.getInventory())) {
             if (BackpackUtils.isBackpackFull(player)) {
                 this.notifyInventoryFull(player);
-                return false;
+                return true;
             }
             BackpackUtils.addBlocks(player, new ItemStack(block.getType(), 1));
             return true;
@@ -359,7 +361,7 @@ public class AutoSellManager {
     }
 
     private ItemStack createItemStackToGive(Player player, Block block) {
-        int amount = FortuneEnchant.getBonusMultiplier(EnchantUtils.getItemFortuneLevel(player.getItemInHand()));
+        int amount = FortuneEnchant.getBonusMultiplier(EnchantUtils.getItemFortuneLevel(player.getItemInHand())) + 1;
 
         ItemStack toGive;
 
@@ -394,14 +396,12 @@ public class AutoSellManager {
         var priceAmount = cachePrices.getOrDefault(blockType, 0D);
 
         Map<AutoSellItemStack, Double> itemsToSell = new HashMap<>();
-        itemsToSell.put(new AutoSellItemStack(createItemStackToGive(player, block)), priceAmount);
+        var itemToList = createItemStackToGive(player, block);
+        itemsToSell.put(new AutoSellItemStack(itemToList), priceAmount * itemToList.getAmount());
 
-        var event = this.callAutoSellEvent(player, null, itemsToSell);
-        if (event.isCancelled()) {
-            return false;
-        }
-
-        itemsToSell = event.getItemsToSell();
+        //var event = this.callAutoSellEvent(player, null, itemsToSell);
+        //if (event.isCancelled()) return false;
+        //itemsToSell = event.getItemsToSell();
 
         int amountOfItems = itemsToSell.keySet().stream().mapToInt(item -> item.getItemStack().getAmount()).sum();
         double moneyEarned = this.sellItems(player, itemsToSell);

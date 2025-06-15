@@ -72,6 +72,9 @@ public final class FortuneEnchant extends XPrisonEnchantment {
         int bonus = getBonusMultiplier(enchantLevel);
         Player player = e.getPlayer();
         if (!this.plugin.getCore().getAutoSell().getManager().hasAutoSellEnabled(e.getPlayer())) {
+
+            if (!this.plugin.getCore().getAutoSell().getManager().getCachePrices().containsKey(block.getType())) return;
+
             ItemStack drop = new ItemStack(dropType, baseAmount + bonus);
             if (!InventoryUtils.hasSpace(player.getInventory())) {
                 if (BackpackUtils.isBackpackFull(player)) {

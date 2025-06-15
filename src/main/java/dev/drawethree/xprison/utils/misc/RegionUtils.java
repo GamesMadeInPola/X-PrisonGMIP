@@ -51,7 +51,9 @@ public class RegionUtils {
 		IWrappedRegion region = getFirstRegionAtLocation(loc);
 		if (region != null && region.getId().startsWith("mina")) {
 			try {
-				int number = Integer.parseInt(region.getId().substring(4));
+				var mineRegion = region.getId().substring(4);
+                mineRegion = mineRegion.replaceAll("\\D", "");
+                int number = Integer.parseInt(mineRegion);
 				return toRoman(number);
 			} catch (NumberFormatException e) {
 				return null;

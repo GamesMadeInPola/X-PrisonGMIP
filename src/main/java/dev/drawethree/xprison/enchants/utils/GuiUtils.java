@@ -23,7 +23,7 @@ public class GuiUtils {
                     .replace("%refund%", String.format("%,d", enchantment.getRefundForLevel(currentLevel)))
                     .replace("%cost%", String.format("%,d", enchantment.getCost() + (enchantment.getIncreaseCost() * currentLevel)))
                     .replace("%max_level%", enchantment.getMaxLevel() == Integer.MAX_VALUE ? "Unlimited" : String.format("%,d", enchantment.getMaxLevel()))
-                    .replace("%chance%", String.format("%,.2f", enchantment.getChanceToTrigger(currentLevel)))
+                    .replace("%chance%", String.format("%,.3f", enchantment.getChanceToTrigger(currentLevel)))
                     .replace("%current_level%", String.format("%,d", currentLevel))
                     .replace("%pickaxe_level%", String.format("%,d", enchantment.getRequiredPickaxeLevel())));
         }

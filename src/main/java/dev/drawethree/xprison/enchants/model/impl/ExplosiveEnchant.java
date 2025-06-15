@@ -148,22 +148,20 @@ public final class ExplosiveEnchant extends XPrisonEnchantment {
 
     private void handleAffectedBlocks(Player p, IWrappedRegion region, List<Block> blocksAffected) {
         double totalDeposit = 0.0;
-        int fortuneLevel = EnchantUtils.getItemFortuneLevel(p.getItemInHand());
+        int fortuneLevel = 1;
 
         boolean autoSellPlayerEnabled = this.plugin.isAutoSellModuleEnabled() && plugin.getCore().getAutoSell().getManager().hasAutoSellEnabled(p);
 
         for (Block block : blocksAffected) {
 
-            int amplifier = fortuneLevel;
-
-            if (FortuneEnchant.isBlockBlacklisted(block)) {
+            /*if (FortuneEnchant.isBlockBlacklisted(block)) {
                 amplifier = 1;
-            }
+            }*/
 
             if (autoSellPlayerEnabled) {
-                totalDeposit += ((plugin.getCore().getAutoSell().getManager().getPriceForBlock(region.getId(), block) + 0.0) * amplifier);
+                totalDeposit += ((plugin.getCore().getAutoSell().getManager().getPriceForBlock(region.getId(), block) + 0.0) * fortuneLevel);
             } else {
-                ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(amplifier);
+                ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(fortuneLevel);
                 if (!InventoryUtils.hasSpace(p.getInventory())) {
                     if (!BackpackUtils.isBackpackFull(p)) {
                         BackpackUtils.addBlocks(p, itemToGive);
@@ -174,6 +172,8 @@ public final class ExplosiveEnchant extends XPrisonEnchantment {
             }
             block.setType(Material.AIR, true);
         }
+
+        plugin.getCore().getAutoSell().getManager().addToLastItems(p, blocksAffected.size());
         this.giveEconomyRewardToPlayer(p, totalDeposit);
     }
 

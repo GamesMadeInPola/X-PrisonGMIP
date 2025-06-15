@@ -129,7 +129,8 @@ public final class NukeEnchant extends XPrisonEnchantment {
 
         var rmAPI = RealMinesAPI.getInstance();
         if (rmAPI != null) {
-            rmAPI.getMineManager().getMine(RegionUtils.getMineRomanName(b.getLocation())).reset(RMine.ResetCause.PLUGIN);
+            var mine = rmAPI.getMineManager().getMine(RegionUtils.getMineRomanName(b.getLocation()));
+            if (mine != null ) mine.reset(RMine.ResetCause.PLUGIN);
         }
         long timeEnd = Time.nowMillis();
         this.plugin.getCore().debug("NukeEnchant::onBlockBreak >> Took " + (timeEnd - startTime) + " ms.", this.plugin);
@@ -137,19 +138,14 @@ public final class NukeEnchant extends XPrisonEnchantment {
 
     private void handleAffectedBlocks(Player p, IWrappedRegion region, List<Block> blocksAffected) {
         double totalDeposit = 0.0;
-        int fortuneLevel = EnchantUtils.getItemFortuneLevel(p.getItemInHand());
-        int blockMulti = FortuneEnchant.getBonusMultiplier(fortuneLevel);
+        int amplifier = 1;
 
         boolean autoSellPlayerEnabled = this.plugin.isAutoSellModuleEnabled() && plugin.getCore().getAutoSell().getManager().hasAutoSellEnabled(p);
 
         for (Block block : blocksAffected) {
-
-            int amplifier = (blockMulti == 0 ? 1 : blockMulti);
-
-            if (FortuneEnchant.isBlockBlacklisted(block)) {
+            /*if (FortuneEnchant.isBlockBlacklisted(block)) {
                 amplifier = 1;
-            }
-
+            }*/
             if (autoSellPlayerEnabled) {
                 totalDeposit += ((plugin.getCore().getAutoSell().getManager().getPriceForBlock(region.getId(), block) + 0.0) * amplifier);
                 plugin.getCore().getAutoSell().getManager().addToLastItems(p, amplifier);

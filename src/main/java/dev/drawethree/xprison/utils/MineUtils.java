@@ -46,7 +46,9 @@ public class MineUtils {
             mineAddBlock(player, list, exceptMines.get(rawRegion));
         } else {
             var mineRegion = getRegion(firsBlock);
-            var romanNumber = toRoman(Integer.parseInt(mineRegion != null ? mineRegion.substring(4) : "-1"));
+            if (mineRegion == null) return;
+            mineRegion = mineRegion.replaceAll("\\D", "");
+            var romanNumber = toRoman(Integer.parseInt(mineRegion));
             mineAddBlock(player, list, romanNumber);
         }
     }
@@ -70,7 +72,7 @@ public class MineUtils {
             String[] tens = new String[]{"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
             String[] hundreds = new String[]{"", "C"};
 
-            return hundreds[number/100] + tens[number/10] + units[number %10];
+            return hundreds[number / 100] + tens[(number % 100) / 10] + units[number % 10];
         } else {
             return number+"";
         }

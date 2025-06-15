@@ -1,6 +1,7 @@
 package dev.drawethree.xprison.enchants.model.impl;
 
 import dev.drawethree.ultrabackpacks.api.UltraBackpacksAPI;
+import dev.drawethree.xprison.autosell.model.AutoSellItemStack;
 import dev.drawethree.xprison.enchants.XPrisonEnchants;
 import dev.drawethree.xprison.enchants.api.events.LayerTriggerEvent;
 import dev.drawethree.xprison.enchants.model.XPrisonEnchantment;
@@ -11,6 +12,7 @@ import dev.drawethree.xprison.utils.BackpackUtils;
 import dev.drawethree.xprison.utils.Constants;
 import dev.drawethree.xprison.utils.MineUtils;
 import dev.drawethree.xprison.utils.compat.CompMaterial;
+import dev.drawethree.xprison.utils.economy.EconomyUtils;
 import dev.drawethree.xprison.utils.inventory.InventoryUtils;
 import dev.drawethree.xprison.utils.misc.RegionUtils;
 import me.lucko.helper.Events;
@@ -27,7 +29,9 @@ import org.codemc.worldguardwrapper.selection.ICuboidSelection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -134,23 +138,18 @@ public final class LayerEnchant extends XPrisonEnchantment {
 
     private void handleAffectedBlocks(@NotNull Player p, IWrappedRegion region, @NotNull List<Block> blocksAffected) {
         double totalDeposit = 0.0;
-        int fortuneLevel = EnchantUtils.getItemFortuneLevel(p.getItemInHand());
-        if (fortuneLevel == 0) return;
+        int fortuneLevel = 1;
         boolean autoSellPlayerEnabled = this.plugin.isAutoSellModuleEnabled() && plugin.getCore().getAutoSell().getManager().hasAutoSellEnabled(p);
-
         for (Block block : blocksAffected) {
 
-            int amplifier = fortuneLevel;
-            if (FortuneEnchant.isBlockBlacklisted(block)) {
+            /*if (FortuneEnchant.isBlockBlacklisted(block)) {
                 amplifier = 1;
-            }
+            }*/
 
             if (autoSellPlayerEnabled) {
-                totalDeposit += ((plugin.getCore().getAutoSell().getManager().getPriceForBlock(region.getId(), block) + 0.0) * amplifier);
-                plugin.getCore().getAutoSell().getManager().addToLastItems(p, amplifier);
+                totalDeposit += ((plugin.getCore().getAutoSell().getManager().getPriceForBlock(region.getId(), block) + 0.0) * fortuneLevel);
             } else {
-                var itemAmount = FortuneEnchant.getBonusMultiplier(amplifier);
-                ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(itemAmount == 0 ? 1 : itemAmount);
+                ItemStack itemToGive = CompMaterial.fromBlock(block).toItem(fortuneLevel);
                 if (!InventoryUtils.hasSpace(p.getInventory())) {
                     if (!BackpackUtils.isBackpackFull(p)) {
                         BackpackUtils.addBlocks(p, itemToGive);
@@ -161,6 +160,8 @@ public final class LayerEnchant extends XPrisonEnchantment {
             }
             block.setType(Material.AIR, true);
         }
+
+        plugin.getCore().getAutoSell().getManager().addToLastItems(p, blocksAffected.size());
         this.giveEconomyRewardToPlayer(p, totalDeposit);
     }
 
